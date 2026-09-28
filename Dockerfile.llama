@@ -15,5 +15,22 @@ RUN apt-get update \
 WORKDIR /opt/llama
 COPY llama-b10909/ /opt/llama/
 
+# llama-b10909/ ships real symlinks for the versioned .so chain (libfoo.so.0 ->
+# libfoo.so.0.N.N). Git on Windows (and on any host without symlink privilege) checks a
+# symlink out as a tiny plain-text file containing the target path instead of a real
+# symlink, which COPY then carries in verbatim -- the loader then fails with "file too
+# short". Self-heal here, inside the Linux build, so host OS/privilege never matters:
+# any small regular (non-symlink) file whose entire content is an existing sibling's name
+# gets replaced with a real symlink to that sibling. A file that came through as a real
+# symlink already (Linux/macOS hosts, or Windows with Developer Mode) is untouched.
+RUN for f in /opt/llama/*; do \
+      [ -f "$f" ] && [ ! -L "$f" ] || continue; \
+      [ "$(stat -c%s "$f")" -lt 200 ] || continue; \
+      tgt="$(cat "$f")"; \
+      case "$tgt" in *[!A-Za-z0-9._-]*|"") continue ;; esac; \
+      [ -e "/opt/llama/$tgt" ] && [ "$tgt" != "$(basename "$f")" ] || continue; \
+      rm -f "$f" && ln -s "$tgt" "$f"; \
+    done
+
 # No ENTRYPOINT/CMD on purpose: the model and sampling flags live in docker-compose.yml
 # where students can read them.

@@ -3,6 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.llama
+    # llama-b10909/ is a vendored x86-64 build (no arm64 binaries in the repo). Ubuntu's
+    # base image is multi-arch, so on Apple Silicon Docker would otherwise default to an
+    # arm64 base and then fail to exec the amd64 llama-server binary inside it. Pinning
+    # the platform forces amd64 end-to-end, which Docker Desktop's Rosetta backend runs
+    # correctly on M-series Macs (a bit slower than native, but correct). No-op on
+    # Windows/Linux/Intel Mac, which are amd64 already.
+    platform: linux/amd64
     command: >
       ./llama-server
       -hf LiquidAI/LFM2.5-1.2B-Instruct-GGUF:Q4_K_M
