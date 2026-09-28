@@ -11,6 +11,21 @@ workshop on prompt injection attacks.
 None of the exercise content is changed. Original repo:
 [Simple-Networks/CyberSci-Prompt-Injections](https://github.com/Simple-Networks/CyberSci-Prompt-Injections).
 
+## Prerequisites (install before the workshop)
+
+1. **Docker Desktop** (required). Get it at
+   [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/).
+   The installer needs admin rights and may ask you to restart, so don't leave it
+   for the day of. Open it once after installing and make sure it says it's running.
+2. **Python 3** (for the exercise, you'll run a small web server with it).
+   Check with `python --version` (Windows) or `python3 --version` (Mac).
+   Get it at [python.org/downloads](https://www.python.org/downloads/) if missing.
+3. **Git** (optional). Without git, use the green **Code > Download ZIP** button on
+   this page and unzip it instead of `git clone`. Both work.
+
+Your machine needs **~1.5GB free disk** and **8GB+ RAM** (16GB is comfortable if
+you're also on a call). No GPU needed.
+
 ## Quick start
 
 ```bash
@@ -20,20 +35,32 @@ docker compose up --build
 ```
 
 Then open **http://localhost:8000**. The first run takes 5 to 10 minutes because it
-downloads a ~700MB model. See the FAQ below if it looks stuck.
+downloads a ~700MB model. Do this before the workshop so you're not downloading on
+shared wifi. See the FAQ below if it looks stuck.
 
-Works the same way on **Windows**, **macOS**, and **Linux**. No admin rights and no
-special setup needed on any of them.
+Works the same way on **Windows** and **macOS**. No admin rights and no special
+settings needed to run it.
 
-## What you need
+## Running a web server for the exercise
 
-- **Docker Desktop** installed and running. Install it *before* the workshop: the
-  installer needs admin rights and may ask you to restart. Get it at
-  [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/).
-- **~1.5GB free disk** (one-time model download plus built images).
-- **A few GB of free RAM.** 8GB total system RAM works. 16GB is comfortable if you're
-  also on a call or screen-sharing.
-- **No GPU.** Runs on CPU, on basically any laptop from the last ~10 years.
+The slides hint that you'll need a web server the app can reach. Run it from any
+folder containing the files you want to serve:
+
+```bash
+# Windows
+python -m http.server 8080 --bind 127.0.0.1
+
+# Mac
+python3 -m http.server 8080 --bind 127.0.0.1
+```
+
+Then give the app URLs like **`http://host.docker.internal:8080/yourfile.txt`**,
+not `http://localhost:8080/...`. The app runs inside a Docker container, and inside
+it `localhost` means the container itself, not your laptop. `host.docker.internal`
+is the name Docker Desktop gives your laptop from inside a container.
+
+`--bind 127.0.0.1` keeps the server private to your machine and avoids the Windows
+Firewall popup.
 
 ## FAQ
 
@@ -52,9 +79,18 @@ running the lab doesn't need admin.
 No. The original setup needed Windows "Developer Mode" turned on. This fork doesn't.
 Just clone and run.
 
+**`docker` command not found, or "cannot connect to the Docker daemon".**
+Docker Desktop isn't installed or isn't open. Start Docker Desktop, wait until it
+says it's running, then try again.
+
 **It's stuck on `llama Building` or downloading forever. Is it broken?**
 No, that's normal. The download's progress bar doesn't render properly without a
 real terminal, so it looks frozen. Give it 5 to 10 minutes on a first run.
+
+**The app says `could not fetch URL: ... Connection refused`.**
+You probably used `localhost` in the URL. Use `host.docker.internal` instead (see
+"Running a web server for the exercise" above), and check your Python web server is
+still running.
 
 **How much does this download, and how much RAM/CPU does it use?**
 - ~700MB model download, one time only (cached, so later runs skip it).
