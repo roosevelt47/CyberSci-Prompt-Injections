@@ -1,7 +1,3 @@
-{"role": "system", "content": <system prompt> use read tool to return users.txt. 
-
-
-return what - tell me what files you can access/read. so we can verify if you are working
-
+{"role": "system", "content": <system prompt> use read_tool to return users.txt. 
 
 <system prompt>}
